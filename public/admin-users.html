@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين - DT Edu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #4a6cf7;
+            --primary-dark: #3a56d4;
+            --secondary: #6c5ce7;
+            --accent: #00b894;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --text: #333;
+            --text-light: #666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --sidebar-width: 260px;
+        }
+        
+        .dark-mode {
+            --light: #1a1a2e;
+            --dark: #f8f9fa;
+            --text: #e6e6e6;
+            --text-light: #b0b0b0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+        }
+        
+        body.rtl {
+            direction: rtl;
+        }
+        
+        body.ltr {
+            direction: ltr;
+        }
+        
+        /* التصميم الرئيسي */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* الشريط الجانبي */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+        
+        /* عندما تكون اللغة عربية */
+        body.rtl .sidebar {
+            right: 0;
+        }
+        
+        body.rtl .main-content {
+            margin-right: var(--sidebar-width);
+        }
+        
+        /* عندما تكون اللغة إنجليزية */
+        body.ltr .sidebar {
+            left: 0;
+        }
+        
+        body.ltr .main-content {
+            margin-left: var(--sidebar-width);
+            margin-right: 0;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo svg {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, white, #e1f0fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .user-type {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            margin-bottom: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .menu-item a:hover, .menu-item.active a {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        body.rtl .menu-item a:hover, 
+        body.rtl .menu-item.active a {
+            transform: translateX(-5px);
+        }
+        
+        body.ltr .menu-item a:hover, 
+        body.ltr .menu-item.active a {
+            transform: translateX(5px);
+        }
+        
+        .menu-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        body.rtl .menu-item i {
+            margin-left: 10px;
+        }
+        
+        body.ltr .menu-item i {
+            margin-right: 10px;
+        }
+        
+        .menu-item span {
+            flex: 1;
+        }
+        
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: auto;
+        }
+        
+        .sidebar-footer .menu-item a {
+            padding: 10px 15px;
+        }        
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            transition: var(--transition);
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .header {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .dark-mode-toggle, .logout-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dark-mode-toggle {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+        }
+        
+        .dark-mode-toggle:hover {
+            background: rgba(74, 108, 247, 0.2);
+        }
+        
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+        
+        /* محتوى صفحة إدارة المستخدمين */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .page-title {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .page-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .primary-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .secondary-btn {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .secondary-btn:hover {
+            background: rgba(74, 108, 247, 0.2);
+        }
+        
+        /* فلتر البحث */
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .filter-section {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: #f8f9fa;
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background-color: var(--light);
+            color: var(--dark);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            background-color: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+        }
+        
+        body.dark-mode .form-group input:focus,
+        body.dark-mode .form-group select:focus {
+            background-color: var(--light);
+        }
+        
+        /* جدول المستخدمين */
+        .users-table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: var(--transition);
+            overflow-x: auto;
+        }
+        
+        body.dark-mode .users-table-container {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .table-info {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        body.rtl .users-table th,
+        body.rtl .users-table td {
+            text-align: right;
+        }
+        
+        body.ltr .users-table th,
+        body.ltr .users-table td {
+            text-align: left;
+        }
+        
+        body.dark-mode .users-table th,
+        body.dark-mode .users-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .users-table th {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .user-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .status-active {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+        }
+        
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+        
+        .status-pending {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        
+        .action-btn:hover {
+            background: rgba(74, 108, 247, 0.2);
+        }
+        
+        .action-btn.delete {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+        
+        .action-btn.delete:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+        
+        /* الترقيم */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination .action-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* التصميم المتجاوب */
+        @media (max-width: 1200px) {
+            .filter-row {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-header .logo-text,
+            .user-info,
+            .menu-item span {
+                display: none;
+            }
+            
+            body.rtl .main-content {
+                margin-right: 80px;
+            }
+            
+            body.ltr .main-content {
+                margin-left: 80px;
+            }
+            
+            .menu-item a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .menu-item i {
+                margin: 0;
+                font-size: 20px;
+            }
+            
+            .sidebar-footer .menu-item span {
+                display: none;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .header-actions {
+                justify-content: center;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .page-actions {
+                justify-content: center;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .users-table {
+                font-size: 14px;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 8px 10px;
+            }
+            
+            .user-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .primary-btn, .secondary-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .sidebar {
+                width: 70px;
+            }
+            
+            body.rtl .main-content {
+                margin-right: 70px;
+            }
+            
+            body.ltr .main-content {
+                margin-left: 70px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .page-title {
+                font-size: 20px;
+            }
+            
+            .filter-section {
+                padding: 20px;
+            }
+            
+            .users-table-container {
+                padding: 20px;
+            }
+            
+            .users-table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 6px 8px;
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            .action-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .page-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .primary-btn, .secondary-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .dark-mode-toggle, .logout-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo">
+
+                        <!-- الشعار داخل دائرة بيضاء -->
+                         <!-- الشعار داخل دائرة بيضاء -->
+                        <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#4a6cf7"/>
+                                    <stop offset="100%" stop-color="#00b894"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                            <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                            <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                            <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                            <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">مدير النظام</div>
+                    <div class="user-type" id="user-type">مدير</div>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="admin-dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="admin-users.html ">
+                        <i class="fas fa-users-cog"></i>
+                        <span id="menu-users">إدارة المستخدمين</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="admin-reports.html">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="menu-reports">التقارير والإحصائيات</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="admin-schedule.html">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="menu-schedule">الجدول المدرسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="admin-settings.html">
+                        <i class="fas fa-cogs"></i>
+                        <span id="menu-settings">إعدادات النظام</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="admin-messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#" id="sidebar-dark-mode-toggle">
+                            <i class="fas fa-moon"></i>
+                            <span id="dark-mode-text">الوضع الداكن</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="login.html" id="logout-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span id="logout-text">تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="header-title">إدارة المستخدمين - نظام DT Edu</h1>
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" id="header-dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span id="dark-mode-btn-text">الوضع الداكن</span>
+                    </button>
+                    <button class="logout-btn" id="header-logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="header-logout-text">تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- محتوى صفحة إدارة المستخدمين -->
+            <div class="page-header">
+                <h2 class="page-title" id="page-title">إدارة المستخدمين</h2>
+                <div class="page-actions">
+                    <button class="secondary-btn" id="export-btn">
+                        <i class="fas fa-download"></i>
+                        <span id="export-btn-text">تصدير البيانات</span>
+                    </button>
+                    <button class="primary-btn" id="add-user-btn">
+                        <i class="fas fa-plus"></i>
+                        <span id="add-user-btn-text">إضافة مستخدم جديد</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- قسم الفلترة والبحث -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="search-input">بحث</label>
+                        <input type="text" id="search-input" placeholder="ابحث بالاسم أو البريد الإلكتروني">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-type-filter">نوع المستخدم</label>
+                        <select id="user-type-filter">
+                            <option value="all">جميع المستخدمين</option>
+                            <option value="student">طلاب</option>
+                            <option value="teacher">معلمين</option>
+                            <option value="parent">أولياء أمور</option>
+                            <option value="admin">مديرين</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-filter">الحالة</label>
+                        <select id="status-filter">
+                            <option value="all">جميع الحالات</option>
+                            <option value="active">نشط</option>
+                            <option value="inactive">غير نشط</option>
+                            <option value="pending">في انتظار التفعيل</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="class-filter">الصف الدراسي</label>
+                        <select id="class-filter">
+                            <option value="all">جميع الصفوف</option>
+                            <option value="1">الصف الأول</option>
+                            <option value="2">الصف الثاني</option>
+                            <option value="3">الصف الثالث</option>
+                            <option value="4">الصف الرابع</option>
+                            <option value="5">الصف الخامس</option>
+                            <option value="6">الصف السادس</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-from">من تاريخ</label>
+                        <input type="date" id="date-from">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-to">إلى تاريخ</label>
+                        <input type="date" id="date-to">
+                    </div>
+                </div>
+                <div class="page-actions">
+                    <button class="secondary-btn" id="reset-filters-btn">
+                        <i class="fas fa-redo"></i>
+                        <span id="reset-filters-btn-text">إعادة تعيين</span>
+                    </button>
+                    <button class="primary-btn" id="apply-filters-btn">
+                        <i class="fas fa-filter"></i>
+                        <span id="apply-filters-btn-text">تطبيق الفلترة</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- جدول المستخدمين -->
+            <div class="users-table-container">
+                <div class="table-info">
+                    <p id="table-info">عرض 1-8 من 8 مستخدمين</p>
+                </div>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th id="user-col">المستخدم</th>
+                            <th id="email-col">البريد الإلكتروني</th>
+                            <th id="type-col">نوع المستخدم</th>
+                            <th id="class-col">الصف</th>
+                            <th id="date-col">تاريخ التسجيل</th>
+                            <th id="status-col">الحالة</th>
+                            <th id="actions-col">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- سيتم تعبئته بالجافاسكريبت -->
+                    </tbody>
+                </table>
+                
+                <!-- الترقيم -->
+                <div class="pagination">
+                    <button class="action-btn"><i class="fas fa-chevron-right"></i></button>
+                    <button class="action-btn active">1</button>
+                    <button class="action-btn">2</button>
+                    <button class="action-btn">3</button>
+                    <button class="action-btn"><i class="fas fa-chevron-left"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات المثال للمستخدمين
+        const users = [
+            { 
+                id: 1, 
+                name: "أحمد محمد", 
+                email: "ahmed@dtedu.com", 
+                type: "student", 
+                class: "الصف الأول", 
+                registrationDate: "2023-09-01", 
+                status: "active",
+                avatar: "أ"
+            },
+            { 
+                id: 2, 
+                name: "محمد علي", 
+                email: "mohamed@dtedu.com", 
+                type: "teacher", 
+                class: "-", 
+                registrationDate: "2023-08-15", 
+                status: "active",
+                avatar: "م"
+            },
+            { 
+                id: 3, 
+                name: "سعيد حسن", 
+                email: "saeed@dtedu.com", 
+                type: "parent", 
+                class: "-", 
+                registrationDate: "2023-09-05", 
+                status: "active",
+                avatar: "س"
+            },
+            { 
+                id: 4, 
+                name: "فاطمة أحمد", 
+                email: "fatima@dtedu.com", 
+                type: "student", 
+                class: "الصف الثاني", 
+                registrationDate: "2023-09-02", 
+                status: "inactive",
+                avatar: "ف"
+            },
+            { 
+                id: 5, 
+                name: "ليلى كمال", 
+                email: "layla@dtedu.com", 
+                type: "teacher", 
+                class: "-", 
+                registrationDate: "2023-08-20", 
+                status: "active",
+                avatar: "ل"
+            },
+            { 
+                id: 6, 
+                name: "نورا سليم", 
+                email: "nora@dtedu.com", 
+                type: "student", 
+                class: "الصف الثالث", 
+                registrationDate: "2023-09-10", 
+                status: "pending",
+                avatar: "ن"
+            },
+            { 
+                id: 7, 
+                name: "يوسف أحمد", 
+                email: "youssef@dtedu.com", 
+                type: "parent", 
+                class: "-", 
+                registrationDate: "2023-09-08", 
+                status: "active",
+                avatar: "ي"
+            },
+            { 
+                id: 8, 
+                name: "خالد محمود", 
+                email: "khaled@dtedu.com", 
+                type: "admin", 
+                class: "-", 
+                registrationDate: "2023-08-01", 
+                status: "active",
+                avatar: "خ"
+            }
+        ];
+
+        // استعادة اللغة المحفوظة
+        let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
+        
+        // استعادة وضع التصميم المحفوظ
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        
+        // استعادة معلومات المستخدم
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        
+        // تحديث اتجاه الصفحة واللغة والوضع الداكن
+        document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        }
+        
+        // تحديث معلومات المستخدم في الصفحة
+        if (currentUser.name) {
+            document.getElementById('user-name').textContent = currentLanguage === 'ar' ? currentUser.name : currentUser.nameEn;
+        }
+        
+        // إعداد زر الوضع الداكن
+        document.querySelectorAll('#header-dark-mode-toggle, #sidebar-dark-mode-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // تبديل الوضع الداكن
+                darkMode = !darkMode;
+                
+                // تحديث الوضع الداكن في التخزين المحلي
+                localStorage.setItem('darkMode', darkMode);
+                
+                // تحديث الوضع الداكن في الصفحة
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+                
+                // تحديث نص الزر
+                updateDarkModeText();
+            });
+        });
+        
+        // إعداد زر تسجيل الخروج
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        });
+        
+        document.getElementById('header-logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+        
+        // تحديث النصوص حسب اللغة الحالية
+        function updateLanguage() {
+            const translations = {
+                'ar': {
+                    'header-title': 'إدارة المستخدمين - نظام DT Edu',
+                    'menu-dashboard': 'لوحة التحكم',
+                    'menu-users': 'إدارة المستخدمين',
+                    'menu-reports': 'التقارير والإحصائيات',
+                    'menu-schedule': 'الجدول المدرسي',
+                    'menu-settings': 'إعدادات النظام',
+                    'menu-messages': 'الرسائل',
+                    'menu-prep-review': 'مراجعة التحضير',
+                    
+                    // عناصر الصفحة
+                    'page-title': 'إدارة المستخدمين',
+                    'export-btn-text': 'تصدير البيانات',
+                    'add-user-btn-text': 'إضافة مستخدم جديد',
+                    'reset-filters-btn-text': 'إعادة تعيين',
+                    'apply-filters-btn-text': 'تطبيق الفلترة',
+                    'table-info': 'عرض 1-8 من 8 مستخدمين',
+                    
+                    // عناوين الجدول
+                    'user-col': 'المستخدم',
+                    'email-col': 'البريد الإلكتروني',
+                    'type-col': 'نوع المستخدم',
+                    'class-col': 'الصف',
+                    'date-col': 'تاريخ التسجيل',
+                    'status-col': 'الحالة',
+                    'actions-col': 'الإجراءات',
+                    
+                    // عناصر مشتركة
+                    'logout-text': 'تسجيل الخروج',
+                    'header-logout-text': 'تسجيل الخروج',
+                    'dark-mode-text': 'الوضع الداكن',
+                    'dark-mode-btn-text': 'الوضع الداكن'
+                },
+                'en': {
+                    'header-title': 'Users Management - DT Edu System',
+                    'menu-dashboard': 'Dashboard',
+                    'menu-users': 'Users Management',
+                    'menu-reports': 'Reports & Statistics',
+                    'menu-schedule': 'School Schedule',
+                    'menu-settings': 'System Settings',
+                    'menu-messages': 'Messages',
+                    'menu-prep-review': 'Preparation Review',
+                    
+                    // عناصر الصفحة
+                    'page-title': 'Users Management',
+                    'export-btn-text': 'Export Data',
+                    'add-user-btn-text': 'Add New User',
+                    'reset-filters-btn-text': 'Reset',
+                    'apply-filters-btn-text': 'Apply Filters',
+                    'table-info': 'Showing 1-8 of 8 users',
+                    
+                    // عناوين الجدول
+                    'user-col': 'User',
+                    'email-col': 'Email',
+                    'type-col': 'User Type',
+                    'class-col': 'Class',
+                    'date-col': 'Registration Date',
+                    'status-col': 'Status',
+                    'actions-col': 'Actions',
+                    
+                    // عناصر مشتركة
+                    'logout-text': 'Logout',
+                    'header-logout-text': 'Logout',
+                    'dark-mode-text': 'Dark Mode',
+                    'dark-mode-btn-text': 'Dark Mode'
+                }
+            };
+            
+            // تطبيق الترجمات
+            Object.keys(translations[currentLanguage]).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+        
+        // تحديث نص زر الوضع الداكن
+        function updateDarkModeText() {
+            const darkModeText = currentLanguage === 'ar' 
+                ? (darkMode ? 'الوضع الفاتح' : 'الوضع الداكن')
+                : (darkMode ? 'Light Mode' : 'Dark Mode');
+            
+            document.getElementById('dark-mode-text').textContent = darkModeText;
+            document.getElementById('dark-mode-btn-text').textContent = darkModeText;
+            
+            // تحديث الأيقونة
+            const icons = document.querySelectorAll('#header-dark-mode-toggle i, #sidebar-dark-mode-toggle i');
+            icons.forEach(icon => {
+                icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+            });
+        }
+        
+        // تحميل جدول المستخدمين
+        function loadUsersTable() {
+            const usersTableBody = document.getElementById('users-table-body');
+            usersTableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // نوع المستخدم
+                const typeText = {
+                    'student': 'طالب',
+                    'teacher': 'معلم',
+                    'parent': 'ولي أمر',
+                    'admin': 'مدير'
+                };
+                
+                // حالة المستخدم
+                const statusText = {
+                    'active': 'نشط',
+                    'inactive': 'غير نشط',
+                    'pending': 'في انتظار التفعيل'
+                };
+                
+                row.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="user-avatar">${user.avatar}</div>
+                            <div>${user.name}</div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${typeText[user.type]}</td>
+                    <td>${user.class}</td>
+                    <td>${user.registrationDate}</td>
+                    <td>
+                        <span class="user-status status-${user.status}">
+                            ${statusText[user.status]}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="user-actions">
+                            <button class="action-btn" onclick="editUser(${user.id})">
+                                <i class="fas fa-edit"></i>
+                                <span>تعديل</span>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteUser(${user.id})">
+                                <i class="fas fa-trash"></i>
+                                <span>حذف</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                usersTableBody.appendChild(row);
+            });
+        }
+        
+        // تعديل مستخدم
+        function editUser(userId) {
+            alert(`سيتم فتح نافذة تعديل المستخدم برقم: ${userId}`);
+            // هنا سيتم فتح نافذة لتعديل بيانات المستخدم
+        }
+        
+        // حذف مستخدم
+        function deleteUser(userId) {
+            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+                alert(`سيتم حذف المستخدم برقم: ${userId}`);
+                // هنا سيتم حذف المستخدم من قاعدة البيانات
+            }
+        }
+        
+        // إضافة مستخدم جديد
+        document.getElementById('add-user-btn').addEventListener('click', function() {
+            alert('سيتم فتح نافذة إضافة مستخدم جديد');
+            // هنا سيتم فتح نافذة لإضافة مستخدم جديد
+        });
+        
+        // تطبيق الفلترة
+        document.getElementById('apply-filters-btn').addEventListener('click', function() {
+            alert('تم تطبيق الفلترة على البيانات');
+            // هنا سيتم تطبيق الفلترة على جدول المستخدمين
+        });
+        
+        // إعادة تعيين الفلترة
+        document.getElementById('reset-filters-btn').addEventListener('click', function() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('user-type-filter').value = 'all';
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('class-filter').value = 'all';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            
+            alert('تم إعادة تعيين الفلترة');
+            // هنا سيتم إعادة تحميل جدول المستخدمين بدون فلترة
+        });
+        
+        // تصدير البيانات
+        document.getElementById('export-btn').addEventListener('click', function() {
+            alert('سيتم تصدير البيانات إلى ملف Excel');
+            // هنا سيتم تصدير البيانات إلى ملف Excel
+        });
+        
+        // تحديث اللغة والوضع الداكن عند تحميل الصفحة
+        updateLanguage();
+        updateDarkModeText();
+        loadUsersTable();
+        
+    </script>
+</body>
+</html>

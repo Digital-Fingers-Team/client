@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+
+on: 
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: finsh_user
+          POSTGRES_PASSWORD: finsh_password
+          POSTGRES_DB: finsh_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --force
+
+      - name: Wait for Postgres to be ready
+        run: |
+          while ! pg_isready -h localhost -p 5432 -U finsh_user; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Set up environment variables
+        run: |
+          echo "DATABASE_URL=postgresql://finsh_user:finsh_password@localhost:5432/finsh_db?schema=public" >> $GITHUB_ENV
+          echo "JWT_SECRET=ci-test-secret" >> $GITHUB_ENV
+          echo "CSRF_SECRET=ci-test-csrf-secret" >> $GITHUB_ENV
+
+      - name: Run Prisma Migrations
+        run: npx prisma migrate deploy
+
+      - name: Run Prisma Seed
+        run: npx prisma db seed
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test -- --coverage
+        env:
+          # Set environment variables for testing
+          NODE_ENV: test
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Archive Production Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist

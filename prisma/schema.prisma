@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sentMessages  Message[]          @relation("MessageSender")
+  courses       Course[]           @relation("CourseTeacher")
+  enrollments   CourseEnrollment[]
+  uploadedFiles File[]
+  conversations Conversation[]     @relation("ConversationParticipants")
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  teacherId   String
+  teacher     User     @relation("CourseTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  enrollments CourseEnrollment[]
+  schedules   Schedule[]
+  files       File[]
+
+  @@map("courses")
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  studentId  String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@map("course_enrollments")
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("schedules")
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants User[]    @relation("ConversationParticipants")
+  messages     Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  fileId         String?
+  sentAt         DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  file         File?        @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@map("messages")
+}
+
+model File {
+  id           String   @id @default(cuid())
+  originalName String
+  path         String
+  size         Int
+  uploaderId   String
+  courseId     String?
+  mimeType     String
+  createdAt    DateTime @default(now())
+
+  uploader User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  course   Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@map("files")
+}
